@@ -1,6 +1,7 @@
 # This is the file that encrypts messages into AES
 import binascii
 from collections import deque
+import numpy as x
 
 s_box_horizontal = {
     '0': [0x63, 0xca, 0xb7, 0x04, 0x09, 0x53, 0xd0, 0x51, 0xcd, 0x60, 0xe0, 0xe7, 0xba, 0x70, 0xe1, 0x8c],
@@ -180,3 +181,57 @@ def shift_rows(columns):
     columns[4] = list(column4)
 
     return columns
+
+
+def mix_columns(columns):
+    i = 1
+
+    while i <= 4:
+        columns[i] = to_int(columns[i])
+
+        a = columns[i][0]
+        b = columns[i][1]
+        c = columns[i][2]
+        d = columns[i][3]
+
+        # code used from https://stackoverflow.com/questions/66115739/aes-mixcolumns-with-python
+
+        columns[i][0] = gmul(a, 2) ^ gmul(b, 3) ^ gmul(c, 1) ^ gmul(d, 1)
+
+        columns[i][1] = gmul(a, 1) ^ gmul(b, 2) ^ gmul(c, 3) ^ gmul(d, 1)
+
+        columns[i][2] = gmul(a, 1) ^ gmul(b, 1) ^ gmul(c, 2) ^ gmul(d, 3)
+
+        columns[i][3] = gmul(a, 3) ^ gmul(b, 1) ^ gmul(c, 1) ^ gmul(d, 2)
+
+        columns[i] = to_hex(columns[i])
+
+        i += 1
+
+    return columns
+
+
+def to_int(arr):
+    for i in range(len(arr)):
+        arr[i] = int(arr[i], 16)
+
+    return arr
+
+
+def to_hex(arr):
+    i = 0
+    for i in range(len(arr)):
+        arr[i] = hex(arr[i])
+
+    return arr
+
+
+def gmul(a, b):
+    # code used from https://stackoverflow.com/questions/66115739/aes-mixcolumns-with-python
+    if b == 1:
+        return a
+    tmp = (a << 1) & 0xff
+    if b == 2:
+        return tmp if a < 128 else tmp ^ 0x1b
+    if b == 3:
+        return gmul(a, 2) ^ a

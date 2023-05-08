@@ -25,8 +25,9 @@ subbed = sub_bytes(formatted_key_sum[0])
 columns = make_columns(subbed)
 
 # shift rows
-print(columns)
-
 new_columns = shift_rows(columns)
 
-print(new_columns)
+# mix columns
+mixed = mix_columns(new_columns)
+
+print(mixed)
